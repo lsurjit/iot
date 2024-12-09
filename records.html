@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -43,7 +42,7 @@
         <thead>
             <tr>
                 <th>Timestamp</th>
-                <th>Tempurature</th>
+                <th>Temperature</th>
                 <th>Humidity%</th>
             </tr>
         </thead>
@@ -53,6 +52,27 @@
     </table>
 
     <script>
+        // Fetches the data from the URL and updates the table
+        function fetchData() {
+            fetch('https://lsurjit.github.io/iot/?temp=xx&hum=xx')
+                .then(response => response.json())
+                .then(data => {
+                    const records = JSON.parse(localStorage.getItem('records')) || [];
+                    const timestamp = new Date().toLocaleString();
+
+                    // Add the new record to the local storage
+                    records.push({
+                        timestamp: timestamp,
+                        temp: data.temp,  // Ensure your response JSON has 'temp' and 'hum' keys
+                        hum: data.hum
+                    });
+
+                    localStorage.setItem('records', JSON.stringify(records));
+                    updateRecords(); // Update the displayed table
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
         function updateRecords() {
             const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
@@ -62,8 +82,8 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${record.timestamp}</td>
-                    <td>${record.hum}</td>
                     <td>${record.temp}</td>
+                    <td>${record.hum}</td>
                 `;
                 recordsTable.appendChild(row);
             });
@@ -85,9 +105,9 @@
                 return;
             }
 
-            let csvContent = 'Fine No,Record No,Timestamp\n';
+            let csvContent = 'Timestamp,Temperature,Humidity%\n';
             records.forEach(record => {
-                csvContent += `${record.temp},${record.hum},${record.timestamp}\n`;
+                csvContent += `${record.timestamp},${record.temp},${record.hum}\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -99,8 +119,10 @@
             URL.revokeObjectURL(url);
         }
 
+        // Fetch data every 3 seconds to update the table in real-time
+        setInterval(fetchData, 2000);  // Auto-fetch every 3 seconds
+
         updateRecords();
-        setInterval(updateRecords, 2000); // Auto-update every 3 seconds
     </script>
 </body>
 </html>
