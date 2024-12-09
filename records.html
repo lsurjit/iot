@@ -21,23 +21,10 @@
             padding: 10px;
             text-align: center;
         }
-        .button-container {
-            margin: 20px 0;
-            text-align: center;
-        }
-        button {
-            padding: 10px;
-            font-size: 16px;
-            margin: 5px;
-        }
     </style>
 </head>
 <body>
     <h1>Submitted Records</h1>
-    <div class="button-container">
-        <button onclick="resetData()">Reset Data</button>
-        <button onclick="downloadData()">Download Records</button>
-    </div>
     <table>
         <thead>
             <tr>
@@ -52,27 +39,6 @@
     </table>
 
     <script>
-        // Fetches the data from the URL and updates the table
-        function fetchData() {
-            fetch('https://lsurjit.github.io/iot/?temp=xx&hum=xx')
-                .then(response => response.json())
-                .then(data => {
-                    const records = JSON.parse(localStorage.getItem('records')) || [];
-                    const timestamp = new Date().toLocaleString();
-
-                    // Add the new record to the local storage
-                    records.push({
-                        timestamp: timestamp,
-                        temp: data.temp,  // Ensure your response JSON has 'temp' and 'hum' keys
-                        hum: data.hum
-                    });
-
-                    localStorage.setItem('records', JSON.stringify(records));
-                    updateRecords(); // Update the displayed table
-                })
-                .catch(error => console.error('Error fetching data:', error));
-        }
-
         function updateRecords() {
             const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
@@ -89,40 +55,8 @@
             });
         }
 
-        function resetData() {
-            const confirmReset = confirm('Are you sure you want to reset all data? This action cannot be undone.');
-            if (confirmReset) {
-                localStorage.removeItem('records');
-                alert('All data has been reset.');
-                updateRecords();
-            }
-        }
-
-        function downloadData() {
-            const records = JSON.parse(localStorage.getItem('records')) || [];
-            if (records.length === 0) {
-                alert('No data available to download.');
-                return;
-            }
-
-            let csvContent = 'Timestamp,Temperature,Humidity%\n';
-            records.forEach(record => {
-                csvContent += `${record.timestamp},${record.temp},${record.hum}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'records.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Fetch data every 3 seconds to update the table in real-time
-        setInterval(fetchData, 2000);  // Auto-fetch every 3 seconds
-
         updateRecords();
+        setInterval(updateRecords, 3000); // Auto-update every 3 seconds
     </script>
 </body>
 </html>
