@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realtime Submitted Records</title>
+    <title>Submitted Records</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,7 +34,7 @@
     </style>
 </head>
 <body>
-    <h1>Realtime Submitted Records</h1>
+    <h1>Submitted Records</h1>
     <div class="button-container">
         <button onclick="resetData()">Reset Data</button>
         <button onclick="downloadData()">Download Records</button>
@@ -42,8 +43,8 @@
         <thead>
             <tr>
                 <th>Timestamp</th>
-                <th>Temperature (°C)</th>
-                <th>Humidity (%)</th>
+                <th>Tempurature</th>
+                <th>Humidity%</th>
             </tr>
         </thead>
         <tbody id="recordsTable">
@@ -52,64 +53,41 @@
     </table>
 
     <script>
-        let records = JSON.parse(localStorage.getItem('records')) || [];
-
-        function fetchRealtimeData() {
-            fetch('https://lsurjit.github.io/iot/?temp=24&hum=56')
-                .then(response => response.text())
-                .then(data => {
-                    const urlParams = new URLSearchParams(data);
-                    const temp = urlParams.get('temp');
-                    const hum = urlParams.get('hum');
-
-                    if (temp && hum) {
-                        const newRecord = {
-                            timestamp: new Date().toLocaleString(),
-                            temp: temp,
-                            hum: hum
-                        };
-
-                        records.unshift(newRecord); // Add the new record to the start of the array
-                        localStorage.setItem('records', JSON.stringify(records)); // Save records to local storage
-                        updateRecordsTable(); // Update the table with new data
-                    }
-                })
-                .catch(error => console.error('Error fetching real-time data:', error));
-        }
-
-        function updateRecordsTable() {
+        function updateRecords() {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
-            recordsTable.innerHTML = ''; // Clear existing table rows
+            recordsTable.innerHTML = '';
 
             records.forEach(record => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${record.timestamp}</td>
-                    <td>${record.temp}</td>
                     <td>${record.hum}</td>
+                    <td>${record.temp}</td>
                 `;
                 recordsTable.appendChild(row);
             });
         }
 
         function resetData() {
-            if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
-                records = [];
+            const confirmReset = confirm('Are you sure you want to reset all data? This action cannot be undone.');
+            if (confirmReset) {
                 localStorage.removeItem('records');
                 alert('All data has been reset.');
-                updateRecordsTable();
+                updateRecords();
             }
         }
 
         function downloadData() {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
             if (records.length === 0) {
                 alert('No data available to download.');
                 return;
             }
 
-            let csvContent = 'Timestamp,Temperature (°C),Humidity (%)\n';
+            let csvContent = 'Fine No,Record No,Timestamp\n';
             records.forEach(record => {
-                csvContent += `${record.timestamp},${record.temp},${record.hum}\n`;
+                csvContent += `${record.temp},${record.hum},${record.timestamp}\n`;
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -121,11 +99,8 @@
             URL.revokeObjectURL(url);
         }
 
-        // Fetch and update real-time data every 2 seconds
-        setInterval(fetchRealtimeData, 2000);
-
-        // Load saved records on page load
-        updateRecordsTable();
+        updateRecords();
+        setInterval(updateRecords, 2000); // Auto-update every 3 seconds
     </script>
 </body>
 </html>
