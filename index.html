@@ -61,13 +61,13 @@
             const hum = document.getElementById('hum').value;
             const timestamp = new Date().toLocaleString();
 
-            const records = JSON.parse(https://lsurjit.github.io/iot/records.html('records')) || [];
+            const records = JSON.parse(localStorage.getItem('records')) || [];
             records.unshift({ temp, hum, timestamp });
-            https://lsurjit.github.io/iot/records.html('records', JSON.stringify(records));
+            localStorage.setItem('records', JSON.stringify(records));
 
             const responseMessage = document.getElementById('responseMessage');
             responseMessage.style.display = 'block';
-            setTimeout(() => responseMessage.style.display = 'none', 2000);
+            setTimeout(() => responseMessage.style.display = 'none', 3000);
 
             document.getElementById('temp').value = '';
             document.getElementById('hum').value = '';
