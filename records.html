@@ -84,7 +84,7 @@
                 return;
             }
 
-            let csvContent = 'Fine No,Record No,Timestamp\n';
+            let csvContent = 'Record No,Fine No,Timestamp\n';
             records.forEach(record => {
                 csvContent += `${record.temp},${record.hum},${record.timestamp}\n`;
             });
