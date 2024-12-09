@@ -69,7 +69,7 @@
         function updateRecords() {
             const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
-            recordsTable.innerHTML = ''; // Clear existing table rows
+            recordsTable.innerHTML = '<a href="https://lsurjit.github.io/iot/" target="_blank">Visit Data Source</a>'; // Clear existing table rows
 
             // Populate the table with the records
             records.forEach(record => {
