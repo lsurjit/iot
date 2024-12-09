@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realtime Data Records</title>
+    <title>Submitted Records</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,7 +33,7 @@
     </style>
 </head>
 <body>
-    <h1>Realtime Data Records</h1>
+    <h1>Submitted Records</h1>
     <div class="button-container">
         <button onclick="resetData()">Reset Data</button>
         <button onclick="downloadData()">Download Records</button>
@@ -54,37 +54,33 @@
     <script>
         let records = JSON.parse(localStorage.getItem('records')) || [];
 
+        // Fetch data from the server
         function fetchData() {
             fetch('https://lsurjit.github.io/iot/?temp=24&hum=56')
                 .then(response => response.text())
                 .then(data => {
-                    // Parse query string values
                     const urlParams = new URLSearchParams(data);
                     const temp = urlParams.get('temp');
                     const hum = urlParams.get('hum');
 
-                    // Add a new record
+                    // Add the new record
                     const newRecord = {
                         timestamp: new Date().toLocaleString(),
                         temp: temp,
                         hum: hum
                     };
 
-                    // Add the new record to the beginning of the array
-                    records.unshift(newRecord);
-
-                    // Save records to local storage
-                    localStorage.setItem('records', JSON.stringify(records));
-
-                    // Update the table
-                    updateTable();
+                    records.unshift(newRecord); // Add the new record at the top
+                    localStorage.setItem('records', JSON.stringify(records)); // Save to localStorage
+                    updateTable(); // Update the table
                 })
                 .catch(error => console.error('Error fetching data:', error));
         }
 
+        // Update the records table
         function updateTable() {
             const recordsTable = document.getElementById('recordsTable');
-            recordsTable.innerHTML = ''; // Clear the table
+            recordsTable.innerHTML = ''; // Clear existing rows
 
             records.forEach(record => {
                 const row = document.createElement('tr');
@@ -97,16 +93,16 @@
             });
         }
 
+        // Reset the records
         function resetData() {
-            const confirmReset = confirm('Are you sure you want to reset all data? This action cannot be undone.');
-            if (confirmReset) {
+            if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
                 records = [];
                 localStorage.removeItem('records');
-                alert('All data has been reset.');
                 updateTable();
             }
         }
 
+        // Download the records as a CSV file
         function downloadData() {
             if (records.length === 0) {
                 alert('No data available to download.');
@@ -127,10 +123,10 @@
             URL.revokeObjectURL(url);
         }
 
-        // Fetch data and update records every 2 seconds
+        // Fetch data and update the table every 2 seconds
         setInterval(fetchData, 2000);
 
-        // Initialize table with saved records
+        // Load records from localStorage on page load
         updateTable();
     </script>
 </body>
