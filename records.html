@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,11 +39,39 @@
     </table>
 
     <script>
+        // Fetch the data from the external URL and update localStorage
+        function fetchData() {
+            // URL of the external device that provides the data
+            const url = 'https://lsurjit.github.io/iot/?temp=22&hum=44'; 
+            
+            // Fetch the data from the URL
+            fetch(url)
+                .then(response => response.json()) // Assuming the data is in JSON format
+                .then(data => {
+                    const timestamp = new Date().toLocaleString();
+                    const records = JSON.parse(localStorage.getItem('records')) || [];
+
+                    // Add the fetched data to the records
+                    records.push({
+                        timestamp: timestamp,
+                        temp: data.temp, // temp key in the response JSON
+                        hum: data.hum  // hum key in the response JSON
+                    });
+
+                    // Save the updated records to localStorage
+                    localStorage.setItem('records', JSON.stringify(records));
+                    updateRecords(); // Update the displayed table
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Function to update the records table from localStorage
         function updateRecords() {
             const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
-            recordsTable.innerHTML = '';
+            recordsTable.innerHTML = ''; // Clear existing table rows
 
+            // Populate the table with the records
             records.forEach(record => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -55,8 +83,11 @@
             });
         }
 
+        // Fetch data every 3 seconds to update the table in real-time
+        setInterval(fetchData, 3000); // Fetch new data every 3 seconds
+
+        // Initial call to populate the table with stored data
         updateRecords();
-        setInterval(updateRecords, 3000); // Auto-update every 3 seconds
     </script>
 </body>
 </html>
