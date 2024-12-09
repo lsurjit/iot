@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submitted Records</title>
+    <title>Realtime Submitted Records</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,7 +33,7 @@
     </style>
 </head>
 <body>
-    <h1>Submitted Records</h1>
+    <h1>Realtime Submitted Records</h1>
     <div class="button-container">
         <button onclick="resetData()">Reset Data</button>
         <button onclick="downloadData()">Download Records</button>
@@ -54,8 +54,7 @@
     <script>
         let records = JSON.parse(localStorage.getItem('records')) || [];
 
-        // Fetch data from the server
-        function fetchData() {
+        function fetchRealtimeData() {
             fetch('https://lsurjit.github.io/iot/?temp=24&hum=56')
                 .then(response => response.text())
                 .then(data => {
@@ -63,24 +62,24 @@
                     const temp = urlParams.get('temp');
                     const hum = urlParams.get('hum');
 
-                    // Add the new record
-                    const newRecord = {
-                        timestamp: new Date().toLocaleString(),
-                        temp: temp,
-                        hum: hum
-                    };
+                    if (temp && hum) {
+                        const newRecord = {
+                            timestamp: new Date().toLocaleString(),
+                            temp: temp,
+                            hum: hum
+                        };
 
-                    records.unshift(newRecord); // Add the new record at the top
-                    localStorage.setItem('records', JSON.stringify(records)); // Save to localStorage
-                    updateTable(); // Update the table
+                        records.unshift(newRecord); // Add the new record to the start of the array
+                        localStorage.setItem('records', JSON.stringify(records)); // Save records to local storage
+                        updateRecordsTable(); // Update the table with new data
+                    }
                 })
-                .catch(error => console.error('Error fetching data:', error));
+                .catch(error => console.error('Error fetching real-time data:', error));
         }
 
-        // Update the records table
-        function updateTable() {
+        function updateRecordsTable() {
             const recordsTable = document.getElementById('recordsTable');
-            recordsTable.innerHTML = ''; // Clear existing rows
+            recordsTable.innerHTML = ''; // Clear existing table rows
 
             records.forEach(record => {
                 const row = document.createElement('tr');
@@ -93,16 +92,15 @@
             });
         }
 
-        // Reset the records
         function resetData() {
             if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
                 records = [];
                 localStorage.removeItem('records');
-                updateTable();
+                alert('All data has been reset.');
+                updateRecordsTable();
             }
         }
 
-        // Download the records as a CSV file
         function downloadData() {
             if (records.length === 0) {
                 alert('No data available to download.');
@@ -123,11 +121,11 @@
             URL.revokeObjectURL(url);
         }
 
-        // Fetch data and update the table every 2 seconds
-        setInterval(fetchData, 2000);
+        // Fetch and update real-time data every 2 seconds
+        setInterval(fetchRealtimeData, 2000);
 
-        // Load records from localStorage on page load
-        updateTable();
+        // Load saved records on page load
+        updateRecordsTable();
     </script>
 </body>
 </html>
