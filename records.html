@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,7 +54,7 @@
 
     <script>
         function updateRecords() {
-            const records = JSON.parse(https://lsurjit.github.io/iot/('records')) || [];
+            const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
             recordsTable.innerHTML = '';
 
@@ -61,8 +62,8 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${record.timestamp}</td>
-                    <td>${record.temp}</td>
                     <td>${record.hum}</td>
+                    <td>${record.temp}</td>
                 `;
                 recordsTable.appendChild(row);
             });
@@ -78,13 +79,13 @@
         }
 
         function downloadData() {
-            const records = JSON.parse(https://lsurjit.github.io/iot/('records')) || [];
+            const records = JSON.parse(localStorage.getItem('records')) || [];
             if (records.length === 0) {
                 alert('No data available to download.');
                 return;
             }
 
-            let csvContent = 'Record No,Fine No,Timestamp\n';
+            let csvContent = 'Fine No,Record No,Timestamp\n';
             records.forEach(record => {
                 csvContent += `${record.temp},${record.hum},${record.timestamp}\n`;
             });
