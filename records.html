@@ -56,7 +56,7 @@
         function updateRecords() {
             const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
-            recordsTable.innerHTML = 'https://lsurjit.github.io/iot/';
+            recordsTable.innerHTML = '';
 
             records.forEach(record => {
                 const row = document.createElement('tr');
