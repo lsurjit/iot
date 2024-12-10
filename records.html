@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,15 +22,28 @@
             padding: 10px;
             text-align: center;
         }
+        .button-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>Submitted Records</h1>
+    <div class="button-container">
+        <button onclick="resetData()">Reset Data</button>
+        <button onclick="downloadData()">Download Records</button>
+    </div>
     <table>
         <thead>
             <tr>
                 <th>Timestamp</th>
-                <th>Temperature</th>
+                <th>Tempurature</th>
                 <th>Humidity%</th>
             </tr>
         </thead>
@@ -39,55 +53,54 @@
     </table>
 
     <script>
-        // Fetch the data from the external URL and update localStorage
-        function fetchData() {
-            // URL of the external device that provides the data
-            const url = 'https://lsurjit.github.io/iot/?temp=22&hum=44'; 
-            
-            // Fetch the data from the URL
-            fetch(url)
-                .then(response => response.json()) // Assuming the data is in JSON format
-                .then(data => {
-                    const timestamp = new Date().toLocaleString();
-                    const records = JSON.parse(localStorage.getItem('records')) || [];
-
-                    // Add the fetched data to the records
-                    records.push({
-                        timestamp: timestamp,
-                        temp: data.temp, // temp key in the response JSON
-                        hum: data.hum  // hum key in the response JSON
-                    });
-
-                    // Save the updated records to localStorage
-                    localStorage.setItem('records', JSON.stringify(records));
-                    updateRecords(); // Update the displayed table
-                })
-                .catch(error => console.error('Error fetching data:', error));
-        }
-
-        // Function to update the records table from localStorage
         function updateRecords() {
             const records = JSON.parse(localStorage.getItem('records')) || [];
             const recordsTable = document.getElementById('recordsTable');
-            recordsTable.innerHTML = '<a href="https://lsurjit.github.io/iot/" target="_blank">Visit Data Source</a>'; // Clear existing table rows
+            recordsTable.innerHTML = '';
 
-            // Populate the table with the records
             records.forEach(record => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${record.timestamp}</td>
-                    <td>${record.temp}</td>
                     <td>${record.hum}</td>
+                    <td>${record.temp}</td>
                 `;
                 recordsTable.appendChild(row);
             });
         }
 
-        // Fetch data every 3 seconds to update the table in real-time
-        setInterval(fetchData, 3000); // Fetch new data every 3 seconds
+        function resetData() {
+            const confirmReset = confirm('Are you sure you want to reset all data? This action cannot be undone.');
+            if (confirmReset) {
+                localStorage.removeItem('records');
+                alert('All data has been reset.');
+                updateRecords();
+            }
+        }
 
-        // Initial call to populate the table with stored data
+        function downloadData() {
+            const records = JSON.parse(localStorage.getItem('records')) || [];
+            if (records.length === 0) {
+                alert('No data available to download.');
+                return;
+            }
+
+            let csvContent = 'Fine No,Record No,Timestamp\n';
+            records.forEach(record => {
+                csvContent += `${record.temp},${record.hum},${record.timestamp}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'records.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         updateRecords();
+        setInterval(updateRecords, 2000); // Auto-update every 3 seconds
     </script>
 </body>
 </html>
