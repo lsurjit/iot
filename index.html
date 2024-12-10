@@ -1,82 +1,68 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Submission</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-        form {
-            display: inline-block;
-            margin-top: 50px;
-        }
-        input, button {
-            margin: 10px 0;
-            padding: 10px;
-            font-size: 16px;
-        }
-        .button-container {
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IoT Real-time Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .data-display {
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      max-width: 400px;
+      background-color: #f9f9f9;
+    }
+    .data-item {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
-    <h1>Test Your Self</h1>
-    <form id="dataForm">
-        <label for="temp">Temp:</label><br>
-        <input type="text" id="temp" name="temp" required><br><br>
-        <label for="hum">Hum:</label><br>
-        <input type="text" id="hum" name="hum" required><br><br>
-        <button type="submit">Submit</button>
-    </form>
-    <p id="responseMessage" style="color: green; display: none;">Data submitted successfully!</p>
+  <h1>IoT Real-time Data</h1>
+  <div class="data-display">
+    <div class="data-item"><strong>Date & Time:</strong> <span id="datetime">Loading...</span></div>
+    <div class="data-item"><strong>Temperature:</strong> <span id="temperature">--</span> °C</div>
+    <div class="data-item"><strong>Humidity:</strong> <span id="humidity">--</span> %</div>
+  </div>
+  <p>Use the URL to send data: <code>?temp=25&humidity=60</code></p>
+  <script>
+    // Function to display current date and time
+    function updateDateTime() {
+      const now = new Date();
+      const datetime = now.toLocaleString();
+      document.getElementById('datetime').textContent = datetime;
+    }
 
-    <div class="button-container">
-        <button onclick="openRecordsPage()">View Submitted Records</button>
-    </div>
+    // Function to get URL query parameters
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        temperature: params.get('temp') || "--",
+        humidity: params.get('humidity') || "--",
+      };
+    }
 
-    <script>
-        // Handle URL query parameters to auto-fill and submit the form
-        const urlParams = new URLSearchParams(window.location.search);
-        const tempParam = urlParams.get('temp');
-        const humParam = urlParams.get('hum');
+    // Function to update data on the webpage
+    function updateData() {
+      const params = getQueryParams();
+      document.getElementById('temperature').textContent = params.temperature;
+      document.getElementById('humidity').textContent = params.humidity;
+    }
 
-        if (tempParam && humParam) {
-            document.getElementById('temp').value = tempParam;
-            document.getElementById('hum').value = humParam;
-
-            setTimeout(() => {
-                document.getElementById('dataForm').dispatchEvent(new Event('submit'));
-            }, 500); // Auto-submit after a short delay
-        }
-
-        document.getElementById('dataForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const temp = document.getElementById('temp').value;
-            const hum = document.getElementById('hum').value;
-            const timestamp = new Date().toLocaleString();
-
-            const records = JSON.parse(localStorage.getItem('records')) || [];
-            records.unshift({ temp, hum, timestamp });
-            localStorage.setItem('records', JSON.stringify(records));
-
-            const responseMessage = document.getElementById('responseMessage');
-            responseMessage.style.display = 'block';
-            setTimeout(() => responseMessage.style.display = 'none', 3000);
-
-            document.getElementById('temp').value = '';
-            document.getElementById('hum').value = '';
-        });
-
-        function openRecordsPage() {
-            window.open('records.html', '_blank');
-        }
-    </script>
+    // Update date and time every second
+    setInterval(updateDateTime, 1000);
+    // Update data from URL parameters
+    updateData();
+  </script>
 </body>
 </html>
