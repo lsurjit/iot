@@ -1,68 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IoT Real-time Data</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    .data-display {
-      margin: 20px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      max-width: 400px;
-      background-color: #f9f9f9;
-    }
-    .data-item {
-      font-size: 1.2em;
-      margin: 10px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Data Logger</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-  <h1>IoT Real-time Data</h1>
-  <div class="data-display">
-    <div class="data-item"><strong>Date & Time:</strong> <span id="datetime">Loading...</span></div>
-    <div class="data-item"><strong>Temperature:</strong> <span id="temperature">--</span> °C</div>
-    <div class="data-item"><strong>Humidity:</strong> <span id="humidity">--</span> %</div>
-  </div>
-  <p>Use the URL to send data: <code>?temp=25&humidity=60</code></p>
-  <script>
-    // Function to display current date and time
-    function updateDateTime() {
-      const now = new Date();
-      const datetime = now.toLocaleString();
-      document.getElementById('datetime').textContent = datetime;
-    }
+    <h1>IoT Data Logger</h1>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 
-    // Function to get URL query parameters
-    function getQueryParams() {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        temperature: params.get('temp') || "--",
-        humidity: params.get('humidity') || "--",
-      };
-    }
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-    // Function to update data on the webpage
-    function updateData() {
-      const params = getQueryParams();
-      document.getElementById('temperature').textContent = params.temperature;
-      document.getElementById('humidity').textContent = params.humidity;
-    }
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    // Update date and time every second
-    setInterval(updateDateTime, 1000);
-    // Update data from URL parameters
-    updateData();
-  </script>
+        // Reference to the database
+        const dbRef = database.ref('iot-data');
+
+        // Listen for new data
+        dbRef.orderByChild('timestamp').on('value', (snapshot) => {
+            const dataTable = document.querySelector('#dataTable tbody');
+            dataTable.innerHTML = ''; // Clear the table
+            const data = snapshot.val();
+            if (data) {
+                const entries = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
+                entries.forEach(entry => {
+                    const row = `<tr>
+                        <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                        <td>${entry.temperature}</td>
+                        <td>${entry.humidity}</td>
+                    </tr>`;
+                    dataTable.innerHTML += row;
+                });
+            }
+        });
+    </script>
 </body>
 </html>
